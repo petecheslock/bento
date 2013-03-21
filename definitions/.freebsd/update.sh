@@ -32,3 +32,6 @@ cd /usr/ports/security/sudo
 make -DBATCH package-recursive clean
 cd /usr/ports/shells/bash-static
 make -DBATCH package clean
+
+# change the vagrant users shell to bash
+chsh -s bash vagrant
