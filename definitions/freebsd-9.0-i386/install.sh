@@ -1,1 +1,0 @@
-../.freebsd/install.sh

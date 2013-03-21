@@ -1,1 +1,0 @@
-../.freebsd/chef-client.sh
