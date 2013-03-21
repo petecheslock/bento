@@ -29,5 +29,5 @@ FREEBSD_SESSION =
                            "minimize.sh"
                          ],
                          :ssh_login_timeout => "2000",
-                         :shutdown_cmd => "shutdown -p now"
+                         :shutdown_cmd => "shutdown -p -o now"
                         })
