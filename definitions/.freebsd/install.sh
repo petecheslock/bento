@@ -3,6 +3,8 @@
 # Credit: http://www.aisecure.net/2011/05/01/root-on-zfs-freebsd-current/
 
 NAME=$1
+MAJOR_VER=$(uname -r | sed -E 's/^([0-9]+)\..*$/\1/')
+ARCH=$(uname -p)
 
 # create disks
 gpart create -s gpt ada0
@@ -82,6 +84,7 @@ echo '/dev/gpt/swap0 none swap sw 0 0' > /mnt/etc/fstab
 
 # Install a few requirements
 echo 'nameserver 8.8.8.8' > /mnt/etc/resolv.conf
+export PACKAGESITE="ftp://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
 pkg_add -C /mnt -r bash-static
 (
   cd /mnt/bin
