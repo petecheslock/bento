@@ -6,7 +6,7 @@ chmod +x /tmp/freebsd-update
 
 # update FreeBSD
 PAGER=/bin/cat /tmp/freebsd-update fetch
-PAGER=/bin/car /tmp/freebsd-update install
+PAGER=/bin/cat /tmp/freebsd-update install
 
 # allow portsnap to run fetch without stdin attached to a terminal
 sed 's/\[ ! -t 0 \]/false/' /usr/sbin/portsnap > /tmp/portsnap
