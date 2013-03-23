@@ -19,7 +19,7 @@ FREEBSD_SESSION =
                           'sleep 10 ; fetch -o /tmp/install.sh http://%IP%:%PORT%/install.sh && chmod +x /tmp/install.sh && /tmp/install.sh %NAME%<Enter>'
                          ],
                          :kickstart_file => "install.sh",
-                         :memory_size=> "512",
+                         :memory_size=> "1024",
                          :os_type_id => 'FreeBSD_64',
                          :postinstall_files => [
                            "update.sh",
