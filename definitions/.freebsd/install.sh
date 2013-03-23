@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh -xe
 
 # Credit: http://www.aisecure.net/2011/05/01/root-on-zfs-freebsd-current/
 
@@ -48,10 +48,14 @@ chmod 1777 /mnt/var/tmp
 
 # Install the OS
 cd /usr/freebsd-dist
-cat base.txz | tar --unlink -xpJf - -C /mnt
-cat lib32.txz | tar --unlink -xpJf - -C /mnt
-cat kernel.txz | tar --unlink -xpJf - -C /mnt
-cat src.txz | tar --unlink -xpJf - -C /mnt
+cat base.txz | tar --unlink -vxpJf - -C /mnt
+cat kernel.txz | tar --unlink -vxpJf - -C /mnt
+cat src.txz | tar --unlink -vxpJf - -C /mnt
+case "${ARCH}" in
+"amd64")
+  cat lib32.txz | tar --unlink -xpJf - -C /mnt
+  ;;
+esac
 
 # set up swap
 zfs create -V 2G zroot/swap
@@ -85,11 +89,11 @@ echo '/dev/gpt/swap0 none swap sw 0 0' > /mnt/etc/fstab
 # Install a few requirements
 echo 'nameserver 8.8.8.8' > /mnt/etc/resolv.conf
 export PACKAGESITE="ftp://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
-pkg_add -C /mnt -r bash-static
+pkg_add -C /mnt -r bash-static || /usr/bin/true
 (
   cd /mnt/bin
   ln -s /usr/local/bin/bash bash
-  pkg_add -C /mnt -r sudo
+  pkg_add -C /mnt -r sudo || /usr/bin/true
   echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /mnt/usr/local/etc/sudoers
   rm /mnt/etc/resolv.conf
 )
