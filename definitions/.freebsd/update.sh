@@ -35,3 +35,10 @@ make -DBATCH package clean
 
 # change the vagrant users shell to bash
 chsh -s bash vagrant
+
+# Set the package site to something sane
+MAJOR_VER=$(uname -r | sed -E 's/^([0-9]+)\..*$/\1/')
+ARCH=$(uname -p)
+#sed -i '' -E "s%^([^#].*):setenv=%\1:setenv=PACKAGESITE=ftp\\\c//ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/,%" /etc/login.conf
+#cap_mkdb /etc/login.conf
+echo "export PACKAGESITE=ftp://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/" >> /etc/profile
