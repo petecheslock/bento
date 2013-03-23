@@ -10,8 +10,8 @@ pkg_add sudo.tbz bash-static.tbz virtualbox-ose-additions.tbz
 # Purge files we don't need any longer
 rm -rf /tmp/chef*
 rm -rf /home/vagrant/VBox*.iso
+find /usr/ports -not -path '/usr/ports/packages*' -and -not -path '/usr/ports/distfiles*' -depth -exec rm -rf '{}' \;
 rm -rf /usr/ports/distfiles/*
-find . -not -name packages -and -not -name distfiles -prune -exec rm -rf '{}' \;
 rm -rf /var/db/freebsd-update/files
 mkdir /var/db/freebsd-update/files
 rm -rf /var/db/freebsd-update/*-rollback
