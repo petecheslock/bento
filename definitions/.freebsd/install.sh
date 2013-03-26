@@ -6,11 +6,26 @@ NAME=$1
 MAJOR_VER=$(uname -r | sed -E 's/^([0-9]+)\..*$/\1/')
 ARCH=$(uname -p)
 
+case "${MAJOR_VER}" in
+"8")
+  DISK_DEV=$(ls -1 /dev | grep ad | head -n1)
+  BOOTPMBR_FILE=/mnt2/boot/pmbr
+  BOOTCODE_FILE=/mnt2/boot/gptzfsboot
+  export FTP_PASSIVE_MODE="YES"
+  ;;
+"9")
+  DISK_DEV=ada0
+  BOOTPMBR_FILE=/boot/pmbr
+  BOOTCODE_FILE=/boot/gptzfsboot
+  DIST_DIR=/usr/freebsd-dist
+  ;;
+esac
+
 # create disks
-gpart create -s gpt ada0
-gpart add -b 34 -s 94 -t freebsd-boot ada0
-gpart add -t freebsd-zfs -l disk0 ada0
-gpart bootcode -b /boot/pmbr -p /boot/gptzfsboot -i 1 ada0
+gpart create -s gpt ${DISK_DEV}
+gpart add -b 34 -s 94 -t freebsd-boot ${DISK_DEV}
+gpart add -t freebsd-zfs -l disk0 ${DISK_DEV}
+gpart bootcode -b ${BOOTPMBR_FILE} -p ${BOOTCODE_FILE} -i 1 ${DISK_DEV}
 
 # align disks
 gnop create -S 4096 /dev/gpt/disk0
@@ -47,13 +62,23 @@ sleep 10
 chmod 1777 /mnt/var/tmp
 
 # Install the OS
-cd /usr/freebsd-dist
-cat base.txz | tar --unlink -vxpJf - -C /mnt
-cat kernel.txz | tar --unlink -vxpJf - -C /mnt
-cat src.txz | tar --unlink -vxpJf - -C /mnt
-case "${ARCH}" in
-"amd64")
-  cat lib32.txz | tar --unlink -xpJf - -C /mnt
+case "${MAJOR_VER}" in
+"8")
+  cd /dist/8.*
+  export DESTDIR=/mnt
+  (cd base ; echo 'y' | ./install.sh)
+  (cd kernels ; ./install.sh generic)
+  (cd src ; ./install.sh all)
+  [ "${ARCH}" = "amd64" ] && (cd lib32 ; ./install.sh)
+  cd /mnt/boot
+  cp -Rlp GENERIC/* /mnt/boot/kernel/
+  ;;
+"9")
+  cd /usr/freebsd-dist
+  cat base.txz | tar --unlink -xpJf - -C /mnt
+  cat kernel.txz | tar --unlink -xpJf - -C /mnt
+  cat src.txz | tar --unlink -xpJf - -C /mnt
+  [ "${ARCH}" = "amd64" ] && cat lib32.txz | tar --unlink -xpJf - -C /mnt
   ;;
 esac
 
@@ -87,8 +112,9 @@ EOT
 echo '/dev/gpt/swap0 none swap sw 0 0' > /mnt/etc/fstab
 
 # Install a few requirements
+echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 echo 'nameserver 8.8.8.8' > /mnt/etc/resolv.conf
-export PACKAGESITE="ftp://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
+export PACKAGESITE="htp://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
 pkg_add -C /mnt -r bash-static || /usr/bin/true
 (
   cd /mnt/bin
@@ -100,11 +126,13 @@ pkg_add -C /mnt -r bash-static || /usr/bin/true
 
 # Set up user accounts
 zfs create zroot/usr/home/vagrant
-echo "vagrant" | pw -V /mnt/etc useradd vagrant -h 0 -s csh -G wheel -d /home/vagrant -c "Vagrant User"
-echo "vagrant" | pw -V /mnt/etc usermod root
+chroot /mnt /bin/sh -c 'echo "vagrant" | pw useradd vagrant -h 0 -s /bin/csh -G wheel -d /home/vagrant -c "Vagrant User"'
+chroot /mnt /bin/sh -c 'echo "vagrant" | pw usermod root'
+chroot /mnt /bin/sh -c 'chown 1001:1001 /home/vagrant'
 
-chown 1001:1001 /mnt/home/vagrant
+# Kill sysinstall instead of rebooting if we're in a gixit shell
+[ "${MAJOR_VER}" = "8" ] && sleep 10 && kill 1
 
 # Reboot
-reboot
+halt
 
