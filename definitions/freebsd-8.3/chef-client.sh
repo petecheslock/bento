@@ -1,2 +1,1 @@
-#!/bin/sh
-echo "fake install chef-client"
+../.freebsd/chef-client.sh
