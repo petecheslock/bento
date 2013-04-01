@@ -59,5 +59,6 @@ FREEBSD_FIXIT_SESSION =
       'dhclient -l /tmp/dhclient.lease.em0 em0<Enter>',
       '<Wait><Wait><Wait>',
       'sleep 10 ; fetch -o /tmp/install.sh http://%IP%:%PORT%/install.sh && chmod +x /tmp/install.sh && /tmp/install.sh %NAME%<Enter>'
-    ]
+    ],
+    :shutdown_cmd => "shutdown -p now"
   })
