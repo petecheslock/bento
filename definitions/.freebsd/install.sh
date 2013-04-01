@@ -99,12 +99,28 @@ sshd_enable="YES"
 EOT
 
 # Tune and boot from zfs
+case "${ARCH}" in
+"i386")
+  # Increase kmem and arc max for i386 due less efficient addressing. This
+  # should reduce the chance of a kernel panic during install or other heavy IO
+  # tasks.
+  KMEMSIZE="400M"
+  KMEMMAX="400M"
+  ARCMAX="80M"
+  ;;
+"amd64")
+  # 64-bit platform tuning for performance on low-mem instances.
+  KMEMSIZE="200M"
+  KMEMMAX="200M"
+  ARCMAX="40M"
+  ;;
+esac
 cat >> /mnt/boot/loader.conf << EOT
 zfs_load="YES"
 vfs.root.mountfrom="zfs:zroot"
-vm.kmem_size="200M"
-vm.kmem_size_max="200M"
-vfs.zfs.arc_max="40M"
+vm.kmem_size="${KMEMSIZE}"
+vm.kmem_size_max="${KMEMMAX}"
+vfs.zfs.arc_max="${ARCMAX}"
 vfs.zfs.vdev.cache.size="5M"
 EOT
 
