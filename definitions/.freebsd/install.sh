@@ -112,9 +112,9 @@ EOT
 echo '/dev/gpt/swap0 none swap sw 0 0' > /mnt/etc/fstab
 
 # Install a few requirements
-echo 'nameserver 8.8.8.8' > /etc/resolv.conf
+[ "${MAJOR_VER}" = "8" ] && ( echo 'nameserver 8.8.8.8' > /etc/resolv.conf )
 echo 'nameserver 8.8.8.8' > /mnt/etc/resolv.conf
-export PACKAGESITE="htp://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
+export PACKAGESITE="http://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
 pkg_add -C /mnt -r bash-static || /usr/bin/true
 (
   cd /mnt/bin
@@ -130,9 +130,11 @@ chroot /mnt /bin/sh -c 'echo "vagrant" | pw useradd vagrant -h 0 -s /bin/csh -G 
 chroot /mnt /bin/sh -c 'echo "vagrant" | pw usermod root'
 chroot /mnt /bin/sh -c 'chown 1001:1001 /home/vagrant'
 
-# Kill sysinstall instead of rebooting if we're in a gixit shell
-[ "${MAJOR_VER}" = "8" ] && sleep 10 && kill 1
+# unmount zfs
+zfs unmount -f zroot
+
+# Kill sysinstall instead of rebooting if we're in a fixit shell
+[ "${MAJOR_VER}" = "8" ] && kill 1
 
 # Reboot
-halt
-
+reboot

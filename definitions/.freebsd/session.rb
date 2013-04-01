@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + "/../.common/session.rb"
 FREEBSD_COMMON_SESSION =
   COMMON_SESSION.merge({
     :kickstart_file => "install.sh",
-    :memory_size=> "1024",
+    :memory_size=> "2048",
     :os_type_id => 'FreeBSD_64',
     :postinstall_files => [
       "update.sh",
