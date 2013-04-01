@@ -12,7 +12,7 @@ FREEBSD_COMMON_SESSION =
       "cleanup.sh",
       "minimize.sh"
     ],
-    :ssh_login_timeout => "2000",
+    :ssh_login_timeout => "4000",
     :shutdown_cmd => "shutdown -p -o now"
   })
 
