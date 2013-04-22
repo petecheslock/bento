@@ -1,6 +1,8 @@
 #!/bin/sh -x
 
-# Note: This is the RideCharge build of omnibus Chef. It is only for freebsd.
-INSTALLER=https://dist.ridecharge.com/pub/omnibus/chef/install.sh
+INSTALLER=chef-client-install.sh
+CHEF_URL=http://dyn-vm.s3.amazonaws.com/chef/install.sh
+#make sure /bin/bash exists for chef install
+ln -s /usr/local/bin/bash /bin/bash
 
-fetch -q -o- ${INSTALLER} | sudo bash
+fetch -o /tmp/${INSTALLER} ${CHEF_URL} && chmod +x /tmp/${INSTALLER} && /tmp/${INSTALLER}

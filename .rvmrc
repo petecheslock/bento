@@ -1,0 +1,5 @@
+rvm use ruby-1.9.3@bento --create
+
+alias veewee="bundle exec veewee"
+alias irb="bundle exec irb"
+alias vagrant="VAGRANT_HOME=~/.vagrant.d.v1 bundle exec vagrant"
