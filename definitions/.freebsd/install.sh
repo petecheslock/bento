@@ -89,7 +89,7 @@ zfs set checksum=off zroot/swap
 
 cp /tmp/zpool.cache /mnt/boot/zfs/zpool.cache
 
-sleep 10
+sleep 25
 # Enable required services
 cat >> /mnt/etc/rc.conf << EOT
 zfs_enable="YES"

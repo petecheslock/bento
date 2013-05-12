@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/../.freebsd/session.rb"
 
-iso = "FreeBSD-9.1-RELEASE-i386-disc1.iso"
+iso = "FreeBSD-9.1-RELEASE-i386-dvd1.iso"
 
 session =
   FREEBSD_SESSION.merge( :os_type_id => 'FreeBSD',

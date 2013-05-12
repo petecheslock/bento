@@ -7,7 +7,6 @@ FREEBSD_COMMON_SESSION =
     :os_type_id => 'FreeBSD_64',
     :postinstall_files => [
       "update.sh",
-      "chef-client.sh",
       "vagrant.sh",
       "cleanup.sh",
       "minimize.sh"
