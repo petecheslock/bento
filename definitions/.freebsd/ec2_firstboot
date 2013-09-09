@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# PROVIDE: ec2_firstboot
+# REQUIRE: FILESYSTEMS
+
+# This script removes the /root/firstboot marker used by ec2_boot and
+# ec2_ephemeralswap; as such, it doesn't make sense to have it not run.
+: ${ec2_firstboot_enable=YES}
+
+. /etc/rc.subr
+
+name="ec2_firstboot"
+rcvar=`set_rcvar`
+start_cmd="ec2_firstboot_run"
+stop_cmd=":"
+
+ec2_firstboot_run()
+{
+        # The first boot has finished.
+        if [ -f /root/firstboot ]; then
+                rm /root/firstboot
+        fi
+}
+
+load_rc_config $name
+run_rc_command "$1"

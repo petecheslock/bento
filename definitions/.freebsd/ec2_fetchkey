@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# PROVIDE: ec2_fetchkey
+# REQUIRE: NETWORKING
+# BEFORE: LOGIN ec2_firstboot
+
+# Define ec2_fetchkey_enable=YES in /etc/rc.conf and create /root/firstboot
+# to enable SSH key fetching when the system next boots.
+#
+: ${ec2_fetchkey_enable=NO}
+
+. /etc/rc.subr
+
+name="ec2_fetchkey"
+rcvar=`set_rcvar`
+start_cmd="ec2_fetchkey_run"
+stop_cmd=":"
+
+SSHKEYURL="http://169.254.169.254/1.0/meta-data/public-keys/0/openssh-key"
+eval SSHKEYFILE="~${ec2_fetchkey_user}/.ssh/authorized_keys"
+
+ec2_fetchkey_run()
+{
+        # If this is the first boot, we need to grab the provided SSH key.
+        if [ -f /root/firstboot ]; then
+                # Grab the provided SSH public key and add it to the
+                # right authorized_keys file to allow it to be used to
+                # log in as the specified user.
+                echo "Fetching SSH public key for ${ec2_fetchkey_user}"
+                mkdir -p `dirname ${SSHKEYFILE}`
+                chmod 700 `dirname ${SSHKEYFILE}`
+                ftp -o ${SSHKEYFILE}.ec2 -a ${SSHKEYURL} >/dev/null
+                if [ -f ${SSHKEYFILE}.ec2 ]; then
+                        touch ${SSHKEYFILE}
+                        sort -u ${SSHKEYFILE} ${SSHKEYFILE}.ec2         \
+                            > ${SSHKEYFILE}.tmp
+                        mv ${SSHKEYFILE}.tmp ${SSHKEYFILE}
+                        rm ${SSHKEYFILE}.ec2
+                else
+                        echo "Fetching SSH public key failed!"
+                fi
+        fi
+}
+
+load_rc_config $name
+run_rc_command "$1"

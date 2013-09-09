@@ -1,4 +1,20 @@
 #!/usr/local/bin/bash -ux
+MAJOR_VER=$(uname -r | sed -E 's/^([0-9]+)\..*$/\1/')
+ARCH=$(uname -p)
+
+echo 'nameserver 8.8.8.8' > /etc/resolv.conf
+export PACKAGESITE="http://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
+
+pkg_add -r bash-static
+pkg_add -r sudo
+
+cd /bin/
+ln -s /usr/local/bin/bash bash
+ln -s /usr/local/bin/bash bash >> /usr/local/etc/sudoers
+
+/bin/sh -c 'echo "vagrant" | pw useradd vagrant -h 0 -s /bin/csh -G wheel -d /home/vagrant -c "Vagrant User"'
+/bin/sh -c 'echo "vagrant" | pw usermod root'
+/bin/sh -c 'chown 1001:1001 /home/vagrant'
 
 # allow freebsd-update to run fetch without stdin attached to a terminal
 sed 's/\[ ! -t 0 \]/false/' /usr/sbin/freebsd-update > /tmp/freebsd-update
@@ -33,6 +49,8 @@ make -DBATCH package-recursive clean
 cd /usr/ports/shells/bash-static
 make -DBATCH package clean
 cd /usr/ports/ftp/curl
+make -DBATCH package clean
+cd /usr/ports/emulators/virtio-kmod
 make -DBATCH package clean
 
 # change the vagrant users shell to bash
