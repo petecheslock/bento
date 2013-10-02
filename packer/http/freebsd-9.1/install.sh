@@ -87,12 +87,26 @@ EOT
 # Enable swap
 echo '/dev/gpt/swap0 none swap sw 0 0' > /mnt/etc/fstab
 
+# Install a few requirements
+echo 'nameserver 8.8.8.8' > /mnt/etc/resolv.conf
+export PACKAGESITE="http://ftp.freebsd.org/pub/FreeBSD/ports/${ARCH}/packages-${MAJOR_VER}-stable/Latest/"
+pkg_add -C /mnt -r bash-static || /usr/bin/true
+(
+  cd /mnt/bin
+  ln -s /usr/local/bin/bash bash
+  pkg_add -C /mnt -r sudo || /usr/bin/true
+  echo '%wheel ALL=(ALL) NOPASSWD: ALL' >> /mnt/usr/local/etc/sudoers
+  rm /mnt/etc/resolv.conf
+)
+
 # Set up user accounts
 zfs create zroot/usr/home/vagrant
-echo "vagrant" | pw -V /mnt/etc useradd vagrant -h 0 -s csh -G wheel -d /home/vagrant -c "Vagrant User"
-echo "vagrant" | pw -V /mnt/etc usermod root
+chroot /mnt /bin/sh -c 'echo "vagrant" | pw useradd vagrant -h 0 -s /bin/csh -G wheel -d /home/vagrant -c "Vagrant User"'
+chroot /mnt /bin/sh -c 'echo "vagrant" | pw usermod root'
+chroot /mnt /bin/sh -c 'chown 1001:1001 /home/vagrant'
 
-chown 1001:1001 /mnt/home/vagrant
+# unmount zfs
+zfs unmount -f zroot
 
 # Reboot
 reboot

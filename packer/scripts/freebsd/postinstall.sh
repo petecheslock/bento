@@ -1,10 +1,22 @@
-#!/bin/csh -x
+#!/usr/local/bin/bash -ux
 # NB: at the point when this script is run, vagrant's shell is csh
-
 set echo
 
 #Set the time correctly
 ntpdate -v -b in.pool.ntp.org
+
+echo 'nameserver 8.8.8.8' > /etc/resolv.conf
+setenv PACKAGESITE "http://ftp.freebsd.org/pub/FreeBSD/ports/amd64/packages-9-stable/Latest/"
+
+pkg_add -r bash-static
+pkg_add -r sudo
+
+cd /bin/
+ln -s /usr/local/bin/bash bash
+
+/bin/sh -c 'echo "vagrant" | pw useradd vagrant -h 0 -s /bin/csh -G wheel -d /home/vagrant -c "Vagrant User"'
+/bin/sh -c 'echo "vagrant" | pw usermod root'
+/bin/sh -c 'chown 1001:1001 /home/vagrant'
 
 date > /etc/vagrant_box_build_time
 
@@ -24,7 +36,7 @@ chmod +x /tmp/portsnap
 cat >> /etc/portsnap.conf << EOT
 REFUSE accessibility arabic archivers astro audio benchmarks biology cad
 REFUSE chinese comms databases deskutils distfiles dns editors finance french
-REFUSE ftp games german graphics hebrew hungarian irc japanese java korean
+REFUSE games german graphics hebrew hungarian irc japanese java korean
 REFUSE mail math multimedia net net-im net-mgmt net-p2p news packages palm
 REFUSE polish portuguese print russian science sysutils ukrainian
 REFUSE vietnamese www x11 x11-clocks x11-drivers x11-fm x11-fonts x11-servers
@@ -38,6 +50,15 @@ EOT
 pkg_delete -af
 cd /usr/ports/security/sudo
 make -DBATCH package-recursive clean
+cd /usr/ports/shells/bash-static
+make -DBATCH package clean
+cd /usr/ports/ftp/curl
+make -DBATCH package clean
+cd /usr/ports/emulators/virtio-kmod
+make -DBATCH package clean
+
+# change the vagrant users shell to bash
+chsh -s bash vagrant
 
 #Installing vagrant keys
 mkdir /home/vagrant/.ssh
@@ -71,9 +92,6 @@ cat >> /etc/make.conf << EOT
 WITHOUT_X11="YES"
 EOT
 
-cd /usr/ports/emulators/virtio-kmod
-make -DBATCH install
-
 # undo our customizations
 sed -i '' -e '/^REFUSE /d' /etc/portsnap.conf
 
@@ -98,6 +116,9 @@ echo 'ifconfig_vtnet3_name="em3"' >> /etc/rc.conf
 
 pw groupadd vboxusers
 pw groupmod vboxusers -m vagrant
+
+#Set the package site to something sane
+echo "export PACKAGESITE=http://ftp.freebsd.org/pub/FreeBSD/ports/amd64/packages-9-stable/Latest/" >> /etc/profile
 
 echo "=============================================================================="
 echo "NOTE: FreeBSD - Vagrant"
