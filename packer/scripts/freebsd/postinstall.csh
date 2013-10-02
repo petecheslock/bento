@@ -71,9 +71,6 @@ cat >> /etc/make.conf << EOT
 WITHOUT_X11="YES"
 EOT
 
-cd /usr/ports/emulators/virtualbox-ose-additions
-make -DBATCH package clean
-
 cd /usr/ports/emulators/virtio-kmod
 make -DBATCH install
 
