@@ -3,7 +3,9 @@
     {
       "type": "shell",
       "scripts": [
-        "scripts/freebsd/postinstall.sh"
+        "scripts/freebsd/postinstall.sh",
+        "scripts/freebsd/cleanup.sh",
+        "scripts/common/minimize.sh"
       ],
       "execute_command": "cat '{{.Path}}' | su -"
     }
